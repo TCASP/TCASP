@@ -2,12 +2,11 @@
 #  Name        : Makefile
 #  Since       : 28/11/2013
 #  Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
-#  Web         : http://www.alus.it/
 #  Version     : 0.0.1
 #  Copyright   : (C) 2014 Alberto Realis-Luc
 #  License     : GNU GPL v2
 #  Repository  : https://github.com/TCASP/TCASP.git
-#  Last change : 29/11/2014
+#  Last change : 30/11/2014
 #  Description : Makefile for TCASP
 # ============================================================================
 #
