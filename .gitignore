@@ -1,0 +1,42 @@
+# Ignore Eclipse project files
+.project
+.cproject
+.settings/*
+
+# Ignore anyway bin folder
+/bin
+
+# Ignore compiled object files
+*.o
+*.so.*
+*.slo
+*.lo
+*.obj
+
+# Ignore precompiled Headers
+*.gch
+*.pch
+
+# Ignore compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Ignore compiled static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Ignore executables
+*.exe
+*.out
+*.app
+
+# Ignore other AVR stuff
+*.hex
+*.eep
+*.elf
+*.d
+
+
