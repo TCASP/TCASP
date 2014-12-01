@@ -15,8 +15,8 @@ void aircraft_t::to_wire(wireprotocol_t &wire)
   wire.height=(byte)(position.z/100);
   wire.speedns=(char)(speed.xy.y/2);
   wire.speedwe=(char)(speed.xy.x/2);
-  wire.speedz=(char)(speed.z*10*.3048);
-  wire.arate=(char)(arate*10);
+  wire.speedz=(char)(speed.z);
+  wire.arate=(char)(arate*500);
   //	wire.cksum=wire.calcchecksum();
 }
 //convert aircraft state from wire representation
@@ -26,9 +26,9 @@ bool aircraft_t::from_wire(const wireprotocol_t &wire)
     return false;
   COPY(callsign,wire.callsign);
   COPY(type,wire.type);
-  position=Dim3::Point(wire.longitude,wire.latitude,wire.height*100);
-  speed=Dim3::Vector(wire.speedwe*2,wire.speedns*2,float(wire.speedz)/10/.3048);
-  arate=(float(wire.arate))/10;
+  position=Dim3::Point(wire.longitude,wire.latitude,short(wire.height)*100);
+  speed=Dim3::Vector(wire.speedwe*2,wire.speedns*2,wire.speedz);
+  arate=(float(wire.arate))/500;
   return true;
 }
 //at 14 degrees latitude
@@ -128,7 +128,7 @@ void myaircraft_t::calcalert(alertaircraft_t &otheraircraft)
   TimeInterval_t t(0, SECONDS);
   t = RAZTimeInterval(position.z - otheraircraft.position.z, speed.z - otheraircraft.speed.z, t);
   a.remtime=t.from;
-  Dim2::VectorAC v=otheraircraft.position.xy-position.xy;
+  Dim2::VectorAC v=position.xy-otheraircraft.position.xy;
   a.distanceinmetres=int(v.mod)%65536;
   a.bearingindegrees=int((v.bearing-Dim2::VectorAC(speed.xy).bearing)*180/pi);
 

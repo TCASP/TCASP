@@ -40,7 +40,7 @@ struct VectorAC:
     float modsquared;
     float bearing;
     void updateangular(){
-      modsquared=(x*x)+(y*y);
+      modsquared=(float(x)*float(x))+(float(y)*float(y));
       mod=sqrt(modsquared);
       bearing=atan2(y,x);
     }

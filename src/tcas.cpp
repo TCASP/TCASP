@@ -91,6 +91,7 @@ void init_state()
   state=AWAIT_GPS;
 }
 float oldbearing;
+short oldaltitude;
 bool gpsio()
 {
   bool newdata=false;
@@ -125,15 +126,23 @@ bool gpsio()
     xy.bearing=gps.f_course()*pi/180;
     xy.mod=gps.f_speed_mps();
     xy.updatecartesian();
-    myaircraft.arate=(xy.bearing-oldbearing)*1000/time;
+    myaircraft.arate=(xy.bearing-oldbearing);
     oldbearing=xy.bearing;
     myaircraft.speed.xy.x=xy.x;
     myaircraft.speed.xy.y=xy.y;
+    myaircraft.speed.z=myaircraft.position.z-oldaltitude;
+    oldaltitude=myaircraft.position.z;
 #if !DEBUG_ARMSTATE
     if (time>5000){
       state=AWAIT_GPS;
       return false;
     }
+#endif
+#if !DEBUG_ALWAYSACTIVE
+  if (xy.mod<4)
+    state=LISTENING;
+   if (xy.mod>6)
+     state=ACTIVE;
 #endif
   }
   return newdata;
@@ -206,13 +215,6 @@ void listening_state()
   {
     displaymillis=millis();
   }
-  //if moving go to active state
-#if DEBUG_ALWAYSACTIVE
-  state=ACTIVE;
-#else
-  if (myaircraft.speed.xy.x>6 || myaircraft.speed.xy.y>6)
-    state=ACTIVE;
-#endif
 }
 void active_state()
 {
@@ -220,7 +222,7 @@ void active_state()
   if (millis()>tx_next)
   {
     digitalWrite(LED,HIGH);
-    wireprotocol_t &wire=*(wireprotocol_t *)radio.DATA;
+    wireprotocol_t wire;
     myaircraft.to_wire(wire);
     radio.send(RF69_BROADCAST_ADDR,&wire,wp_size);
     tx_next=millis()+3000;
@@ -228,11 +230,6 @@ void active_state()
     radio.receiveDone();//switch to RX mode
   }
   listening_state();
-  //if !moving go to listening state
-#if !DEBUG_ALWAYSACTIVE
-  if (myaircraft.speed.xy.x<4 && myaircraft.speed.xy.y<4)
-    state=LISTENING;
-#endif
 }
 void shutdown_state()
 {
