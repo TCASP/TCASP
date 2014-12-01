@@ -6,30 +6,57 @@
 #  Copyright   : (C) 2014 Alberto Realis-Luc
 #  License     : GNU GPL v2
 #  Repository  : https://github.com/TCASP/TCASP.git
-#  Last change : 30/11/2014
+#  Last change : 01/12/2014
 #  Description : Makefile for TCASP
 # ============================================================================
 #
-# If you're using Debian... you're right!
-# Install the following packges: avr-libc avrdude gcc-avr gdb-avr
+#
+# HOW TO PREPARE THE BUILD ENVIRONMENT
+#
+# ON LINUX (Debian or Ubuntu)
+# Install the following packages: avr-libc avrdude gcc-avr gdb-avr
 # Headers are here: /usr/lib/avr/include
 # Libs are here: /usr/lib/avr/lib
+# Done!
 #
-# On command line:
-# 	make all = Make software.
-# 	make clean = Clean out built project files.
-# 	make program = Download the hex file to the device, using avrdude
-# To rebuild project do "make clean" then "make all".
-# Using Eclipse it is possible to use another configuration to call the taget <program> to program directly the HEX on the MCB board
+# ON WINDOWS
+# You need to have the AVR compiler and a GNU make utility able to process this makefile 
+# For the AVR compiler you can install the Arduino IDE or WinAVR
+# The Arduino IDE is including WinAVR in one of his installation subfolder
+# WinAVR has also a make utility but it is better to use the one of MinGW
+# WinAVR installer is adding the compiler and tools to the path automatically
+# Make sure that all compilers tools and the make utility are in your path
+# In the Arduino IDE they are usually here: C:\Program Files (x86)\Arduino\hardware\tools\avr\bin
+# With WinAVR they are usually here: C:\Program Files (x86)\WinAVR-20100110\bin
+# Also make must be in your path with MinGW it is here: C:\MinGW\bin
+# If you are using Eclipse you can configure a specific path only for current project without configure the system path
+# Eclipse project's path settings are here: Project -> Properties -> C/C++ Build -> Environment
 # The windows driver for the Atmel AVR USB programmer can be found in the directory: utils\libusb\bin of WinAVR
+#
+# Compiling from command line:
+# 	make all                  Build all
+# 	make clean                Clean out built project files
+# 	make program PORT=COM1    Upload the hex file to the device, using avrdude and the specified serial port (COM1 in this example)
+# To rebuild project do "make clean" then "make all".
+#
+# Using Eclipse it is possible to use another configuration to call the taget <program> to program directly the HEX on the MCB board
 # ============================================================================
 
-# Directory and paths configuration (useful on Windows...)
-# DIRAVR = 
-# DIRAVRBIN = $(DIRAVR)/bin
-# DIRAVRUTILS = $(DIRAVR)/utils/bin
-# DIRINC = .
-# DIRLIB = $(DIRAVR)/avr/lib
+
+
+# Adapt to Windows if necessary
+#ifdef($(OS),Windows_NT)
+ifdef SystemRoot
+   RM = del /Q
+   FixPath = $(subst /,\,$1)
+   PORT ?= COM1
+else
+#   ifeq ($(shell uname), Linux)
+      RM = rm -f
+      FixPath = $1
+      PORT ?= /dev/ttyACM0
+#   endif
+endif
 
 # Compiler and other tools
 CC = avr-gcc
@@ -48,7 +75,8 @@ VERSION = 0.0.1
 SRC = src/
 
 # Binary paths (output folder)
-BIN = bin/
+BINDIR = bin
+BIN = $(BINDIR)/
 
 # Bootlader address
 MT_BOOTLOADER_ADDRESS = F800 
@@ -184,7 +212,7 @@ LLIBS = -L$(BIN) -lm
 AVRDUDE_PROGRAMMER = arduino
 
 # Programming port: com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = /dev/ttyACM0
+AVRDUDE_PORT = $(PORT)
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(BIN)$(TARGET).hex:i
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(BIN)$(TARGET).eep
@@ -212,11 +240,6 @@ AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 
 # Dependencies
 all: $(BIN)$(TARGET).hex
-
-# Create bin directory if missing
-$(OBJ): | $(BIN)
-$(BIN):
-	mkdir -p bin
 
 # Build HEX file
 $(BIN)$(TARGET).hex: $(BIN)$(TARGET).elf
@@ -282,10 +305,17 @@ $(BIN)%.c.o: $(CORE)%.c
 	@echo ** Compiling Arduino core library C file: $< **
 	$(CC) -c $(CFLAGS) $(DEFS) $< -o $@
 
+# Create bin directory if missing
+$(OBJ): | $(BINDIR)
+$(CORE_OBJ): | $(BINDIR)
+$(LIB_OBJ): | $(BINDIR)
+$(BINDIR):
+	mkdir $(BINDIR)
+
 # Clean project
 clean:
 	@echo **** Clean $(TARGET) project ****
-	rm $(BIN)*
+	$(RM) $(call FixPath,$(BIN)*)
 
 # Program Arduino board
 program: $(BIN)$(TARGET).hex $(BIN)$(TARGET).eep
