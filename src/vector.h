@@ -122,7 +122,7 @@ namespace Dim3
     VectorAC(const Dim2::Vector &_xy,const short &_z):
     xy(_xy),z(_z){
     }
-    VectorAC(Dim3::Vector &v):
+    VectorAC(const Dim3::Vector &v):
     xy(v.xy.x,v.xy.y),z(v.z){
     }
     VectorAC():

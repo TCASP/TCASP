@@ -27,9 +27,10 @@ struct TimeInterval_t
 struct Results_t
 {
   char time;
-  int distance;
-  Results_t(char _time,int _distance):
-  time(_time),distance(_distance){
+  int distanceZ;
+  int distanceXY;;
+  Results_t(char _time,int _distanceZ,int _distanceXY):
+  time(_time),distanceZ(_distanceZ),distanceXY(_distanceXY){
   };
 };
 
@@ -52,7 +53,6 @@ struct aircraft_t
   }
   void to_wire(wireprotocol_t &wire);
   bool from_wire(const wireprotocol_t &wire);
-    Dim3::Point* calcfutures();
 };
 
 struct alertaircraft_t:
@@ -72,10 +72,8 @@ struct myaircraft_t:
 public aircraft_t
 {
   void calcalert(alertaircraft_t &otheraircraft);
-  Results_t MinDistanceXY(Dim3::Point* p1, Dim3::Point* p2,TimeInterval_t &ti);
-  Results_t MinDistanceZ(Dim3::Point* p1, Dim3::Point* p2,TimeInterval_t &ti);
   TimeInterval_t RAZTimeInterval(float s1, float v1, TimeInterval_t t);
-
+  Results_t calcresults(alertaircraft_t &otheraircraft,const TimeInterval_t &t);
 };
 #endif
 
