@@ -21,6 +21,18 @@
 #define DEBUG_RX 0
 #define DEBUG_GPS 0
 
+#ifndef VERSION
+#define VERSION "0.0.1"
+#endif
+
+#ifndef CALLSIGN
+#define CALLSIGN "UNDEF"
+#endif
+
+#ifndef AIRCRAFT_TYPE
+#define AIRCRAFT_TYPE "XXXX"
+#endif
+
 #include "Arduino.h"
 void setup();
 void init_state();
@@ -66,8 +78,8 @@ void setup() {
   memset(&myaircraft,0,sizeof(myaircraft));
   memset(&otheraircraft,0,sizeof(otheraircraft));
   memset(&alertaircraft,0,sizeof(alertaircraft));
-  COPY(myaircraft.callsign,"9HUCM");
-  COPY(myaircraft.type,"TL20");
+  COPY(myaircraft.callsign,CALLSIGN);
+  COPY(myaircraft.type,AIRCRAFT_TYPE);
 
   // set up the LCD's number of columns and rows: 
   delay(2500);
@@ -78,7 +90,9 @@ void setup() {
   lcd.display();
   show_state();
   lcd.setCursor(2,1);
-  lcd.print("TCAS v0.1 CM2014");
+  char str[20];
+  sprintf(str,"TCASP ver %s",VERSION);
+  lcd.print(str);
   gpsserial.begin(9600);
   Serial.begin(9600);
   gpsserial.listen();

@@ -3,10 +3,10 @@
 #  Since       : 28/11/2013
 #  Author      : Alberto Realis-Luc <alberto.realisluc@gmail.com>
 #  Version     : 0.0.1
-#  Copyright   : (C) 2014 Alberto Realis-Luc
+#  Copyright   : (C) 2015 Alberto Realis-Luc
 #  License     : GNU GPL v2
 #  Repository  : https://github.com/TCASP/TCASP.git
-#  Last change : 01/12/2014
+#  Last change : 25/01/2015
 #  Description : Makefile for TCASP
 # ============================================================================
 #
@@ -34,10 +34,17 @@
 # The windows driver for the Atmel AVR USB programmer can be found in the directory: utils\libusb\bin of WinAVR
 #
 # Compiling from command line:
-# 	make all                  Build all
-# 	make clean                Clean out built project files
-# 	make program PORT=COM1    Upload the hex file to the device, using avrdude and the specified serial port (COM1 in this example)
-# To rebuild project do "make clean" then "make all".
+#
+#  make all CALLSIGN=xxxx AIRCRAFT_TYPE=yyyy
+#   Builds all, where xxxx and yyyy are the callsign and aircraft type (maximum 5 and 4 characters respectively)
+#   They will be used by the system to indentify own airplane 
+#
+#  make clean
+#   Cleans out built binary files
+#
+#  make program PORT=COM1
+#   Uploads the hex file to the device, using avrdude and the specified serial port (COM1 in this example)
+#   Under Linux the serial device is usually something like: /dev/ttyUSB0 or /dev/ttyACM0
 #
 # Using Eclipse it is possible to use another configuration to call the taget <program> to program directly the HEX on the MCB board
 # ============================================================================
@@ -47,15 +54,15 @@
 # Adapt to Windows if necessary
 #ifdef($(OS),Windows_NT)
 ifdef SystemRoot
-   RM = del /Q
-   FixPath = $(subst /,\,$1)
-   PORT ?= COM1
+	RM = del /Q
+	FixPath = $(subst /,\,$1)
+	PORT ?= COM1
 else
-#   ifeq ($(shell uname), Linux)
-      RM = rm -f
-      FixPath = $1
-      PORT ?= /dev/ttyACM0
-#   endif
+#	ifeq ($(shell uname), Linux)
+		RM = rm -f
+		FixPath = $1
+		PORT ?= /dev/ttyUSB0
+#	endif
 endif
 
 # Compiler and other tools
@@ -70,6 +77,12 @@ AVRDUDE = avrdude
 
 # Version string
 VERSION = 0.0.1
+
+# Default callsign (max 5 chars)
+CALLSIGN = 9HUCM
+
+# Default aircraft type (max 4 chars)
+AIRCRAFT_TYPE = TL20
 
 # Source paths
 SRC = src/
@@ -195,6 +208,9 @@ CPPFLAGS += -fno-exceptions
 
 # Defines
 DEFS = -DF_CPU=16000000L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=104
+DEFS += -D'VERSION="$(VERSION)"'
+DEFS += -D'CALLSIGN="$(CALLSIGN)"'
+DEFS += -D'AIRCRAFT_TYPE="$(AIRCRAFT_TYPE)"'
 
 # Linker flags
 #  -Wl,...:     tell GCC to pass this to linker.
